@@ -10,8 +10,8 @@ Base = declarative_base()
 class Command(Base):
     __tablename__ = "commands"
     id = Column(Integer, primary_key = True)
-    name = Column(String)
-    path = Column(String)
+    actions = Column(String)
+    key_code = Column(Integer)
     upload_date = Column(Date)
    
 class User_Command(Base):
