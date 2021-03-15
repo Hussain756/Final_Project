@@ -11,7 +11,8 @@ audio_stream = None
 try:
     porcupine = pvporcupine.create(keyword_paths=[
         'wake_word\\pause_game_windows_3_30_2021_v1.9.0\\pause_game_windows_2021-03-30-utc_v1_9_0.ppn',
-        'wake_word\\play_game_windows_3_30_2021_v1.9.0\\play_game_windows_2021-03-30-utc_v1_9_0.ppn'],
+        'wake_word\\play_game_windows_3_30_2021_v1.9.0\\play_game_windows_2021-03-30-utc_v1_9_0.ppn',
+        'wake_word\\flappy_up_linux_2021-04-14-utc_v1_9_0.ppn'],
         keywords=["blueberry", "grapefruit"])
         
     pa = pyaudio.PyAudio()
