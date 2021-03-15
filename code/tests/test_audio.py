@@ -37,6 +37,7 @@ def record_audio():
         
 
     print('Finished recording')
+    
 
         # Save the recorded data as a WAV file
     wf = wave.open(filename, 'wb')
@@ -45,7 +46,9 @@ def record_audio():
     wf.setframerate(fs)
     wf.writeframes(b''.join(frames))
     wf.close()
-
+    play_audio()
+    
+    
 
 def play_audio():
 
@@ -75,15 +78,21 @@ def play_audio():
         stream.write(data)
         data = wf.readframes(chunk)
 
+        
+
         # Close and terminate the stream
     stream.close()
     p.terminate()
-        
-if __name__== '__main__':
-    while True:
+
+if __name__=="__main__":
         record_audio()
-        play_audio()
-        print("Next")
+
+    
+
+    
+    
+    
+        
 
 
 
