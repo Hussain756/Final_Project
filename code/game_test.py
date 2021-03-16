@@ -52,6 +52,7 @@ def listen(game: DinoGame):
     pcm = struct.unpack_from("h" * porcupine.frame_length, pcm)
 
     keyword_index = porcupine.process(pcm)
+    print(keyword_index, end='')
     if keyword_index==0:
         game.jump()
     elif keyword_index==1:
