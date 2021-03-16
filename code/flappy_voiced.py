@@ -76,7 +76,20 @@ def setup_voice_control():
     except Exception as e:
         return False
 
-def release_voice_control():
+def listen():
+    global porcupine
+    global pa
+    global audio_stream
+    pcm = audio_stream.read(porcupine.frame_length)
+    pcm = struct.unpack_from("h" * porcupine.frame_length, pcm)
+    keyword_index = porcupine.process(pcm)
+    print(keyword_index, end=' ')
+    if keyword_index==0:
+        return 'JUMP'
+    elif keyword_index==1:
+        return 'QUIT'
+
+def quit():
     global porcupine
     global pa
     global audio_stream
@@ -88,27 +101,16 @@ def release_voice_control():
 
     if pa is not None:
             pa.terminate()
-
-# def callback(in_data, frame_count, time_info, status):
-#     # data = wf.readframes(frame_count)
-#     return data, pyaudio.paContinue
-
-def action():
-    pcm = audio_stream.read(porcupine.frame_length)
-    pcm = struct.unpack_from("h" * porcupine.frame_length, pcm)
-    keyword_index = porcupine.process(pcm)
-    if keyword_index==0:
-        print('pause')
-    elif keyword_index==1:
-        print('play') 
-     
-
+    
+    pygame.quit()
+    sys.exit()
+   
 def main():
     global SCREEN, FPSCLOCK
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
-    pygame.display.set_caption('Flappy Bird')
+    pygame.display.set_caption('Flappy Bird Voice')
 
     # numbers sprites for score display
     IMAGES['numbers'] = (
@@ -182,7 +184,6 @@ def main():
         crashInfo = mainGame(movementInfo)
         showGameOverScreen(crashInfo)
 
-
 def showWelcomeAnimation():
     """Shows welcome screen animation of flappy bird"""
     # index of player to blit on screen
@@ -205,18 +206,18 @@ def showWelcomeAnimation():
     playerShmVals = {'val': 0, 'dir': 1}
 
     while True:
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                pygame.quit()
-                sys.exit()
-            if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
+        event = listen()
+        if event =='QUIT':
+            pygame.quit()
+            sys.exit()
+        if event =='JUMP':
                 # make first flap sound and return values for mainGame
-                SOUNDS['wing'].play()
-                return {
-                    'playery': playery + playerShmVals['val'],
-                    'basex': basex,
-                    'playerIndexGen': playerIndexGen,
-                }
+            SOUNDS['wing'].play()
+            return {
+                'playery': playery + playerShmVals['val'],
+                'basex': basex,
+                'playerIndexGen': playerIndexGen,
+            }
 
         # adjust playery, playerIndex, basex
         if (loopIter + 1) % 5 == 0:
@@ -233,7 +234,6 @@ def showWelcomeAnimation():
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
-
 
 def mainGame(movementInfo):
     score = playerIndex = loopIter = 0
@@ -274,15 +274,15 @@ def mainGame(movementInfo):
 
 
     while True:
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                pygame.quit()
-                sys.exit()
-            if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
-                if playery > -2 * IMAGES['player'][0].get_height():
-                    playerVelY = playerFlapAcc
-                    playerFlapped = True
-                    SOUNDS['wing'].play()
+        event = listen()
+        if event=='QUIT':
+            pygame.quit()
+            sys.exit()
+        if event =='JUMP':
+            if playery > -2 * IMAGES['player'][0].get_height():
+                playerVelY = playerFlapAcc
+                playerFlapped = True
+                SOUNDS['wing'].play()
 
         # check for crash here
         crashTest = checkCrash({'x': playerx, 'y': playery, 'index': playerIndex},
@@ -367,7 +367,6 @@ def mainGame(movementInfo):
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
-
 def showGameOverScreen(crashInfo):
     """crashes the player down ans shows gameover image"""
     score = crashInfo['score']
@@ -389,13 +388,13 @@ def showGameOverScreen(crashInfo):
         SOUNDS['die'].play()
 
     while True:
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                pygame.quit()
-                sys.exit()
-            if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
-                if playery + playerHeight >= BASEY - 1:
-                    return
+        event = listen()
+        if event=='QUIT':
+            pygame.quit()
+            sys.exit()
+        if event =='JUMP':
+            if playery + playerHeight >= BASEY - 1:
+                return
 
         # player y shift
         if playery + playerHeight < BASEY - 1:
@@ -532,4 +531,7 @@ def getHitmask(image):
     return mask
 
 if __name__ == '__main__':
-    main()
+    if setup_voice_control():
+        main()
+    else:
+        print('setup voice control')
